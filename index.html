@@ -37,9 +37,10 @@ body[unresolved] {opacity: 0; display: block; overflow: hidden; position: relati
 
   <h2>Cieľ projektu</h2>
   <p>
-    Cieľom projektu je vytvoriť systém typu T9 (autocomplete) pre slovenský jazyk, ktorý bude navrhovať 
-    možné slová na základe čiastočne zadaného textu. Projekt sa zameriava na efektívne spracovanie slovníka, 
-    predikciu a optimalizáciu návrhov pre používateľa.
+    Cieľom projektu je vytvoriť základ pre automatické dopĺňanie slov (autocomplete) pre 
+    slovenský jazyk v systéme GrapheneOS. Keďže GrapheneOS neobsahuje plnohodnotnú podporu 
+    slovenského jazyka v natívnej klávesnici, cieľom je vytvoriť frekvenčný slovník slovenských 
+    slov, ktorý môže byť použitý ako vstup pre systém návrhov slov pri písaní.
   </p>
 
   <h2>Hlavné úlohy</h2>
@@ -62,11 +63,41 @@ body[unresolved] {opacity: 0; display: block; overflow: hidden; position: relati
     <!-- добавляй пункты по мере готовности -->
     <!-- <li><a href="./reports/report1.pdf">Report 1 (pdf)</a></li> -->
     <!-- <li><a href="./reports/report2.pdf">Report 2 (pdf)</a></li> -->
-    <li>(bude dopĺňané)</li>
-  </ul>
+    <li><b>Zdroj dát</b>. Ako zdroj textových dát bola zvolená slovenská Wikipédia. Tento zdroj 
+      poskytuje veľké množstvo verejne dostupného textu v slovenskom jazyku, ktorý 
+      je vhodný na štatistickú analýzu jazyka a tvorbu slovníkov. Na extrakciu čistého textu z XML dumpu bol použitý nástroj
+      WikiExtractor <pre> python -m wikiextractor.WikiExtractor \
+        skwiki-latest-pages-articles.xml.bz2 \
+        -o wiki_text \
+        --no-templates </pre>
+    </li>
+
+    <li><b>Spracovanie textu a filtrácia</b>. Extrahovaný text bol spracovaný pomocou vlastných
+      Python skriptov. Počas spracovania boli aplikované nasledujúce filtre: 
+      <ul> 
+        <li>konverzia slov na malé písmená,</li> 
+        <li>odstránenie neabecedných znakov,</li> 
+        <li>ponechanie iba slov so slovenskými diakritickými znakmi,</li> 
+        <li>odstránenie technických výrazov (napr. wiki, html, xml)</li>
+      </ul>
+      <pre>cat wiki_text/*/* | python3 scripts/count_frequencies.py > intermediate/frequencies.txt</pre>
+
+      <li><b>Normalizácia frekvencií</b>. Surové frekvencie boli následne normalizované pomocou
+        logaritmickej funkcie, aby sa zabránilo dominancii veľmi častých slov. Maximálna hodnota frekvencie
+        bola obmedzená na 255, čo zodpovedá rozsahu používanému v LatinIME.
+        <pre>python3 normalize_frequencies.py < ../intermediate/frequencies.txt > ../intermediate/normalized.txt</pre>
+        Súbor bol následne zabalený do archívu:
+        <pre> zip sk_wordlist.combined.zip sk_wordlist.combined </pre>
+      </li>
+
+      <li><b>Výsledok</b>. Výsledkom projektu je kvalitný frekvenčný slovník slovenského
+        jazyka, ktorý je pripravený na ďalšie spracovanie pomocou nástroja <code>dicttool_aosp</code> v
+        prostredí AOSP. Projekt preukázal, že príprava jazykového slovníka je realizovateľná mimo systému
+        Android, avšak jeho integrácia a testovanie si vyžaduje kompletné zostavenie systému GrapheneOS.
+      </li>
 
   <hr>
-  <p>Posledná aktualizácia: <span id="dt">24. 10. 2025</span></p>
+  <p>Posledná aktualizácia: <span id="dt">15. 1. 2026</span></p>
   <script>document.getElementById('dt').textContent = new Date().toLocaleDateString('sk-SK');</script>
 
 

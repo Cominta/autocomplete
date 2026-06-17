@@ -1,0 +1,1 @@
+java -jar dicttool_aosp.jar makedict -s sk_wordlist.combined -d main_sk.dict
